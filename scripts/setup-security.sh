@@ -117,14 +117,14 @@ setup_git_credentials() {
 
     if ! command_exists gh; then
         log_warning "GitHub CLI (gh) not found. Skipping credential helper setup."
-        log_info "Install gh and run 'gh auth login' to enable Git authentication."
+        log_info "Install gh and run 'gh auth login && gh auth setup-git' to enable Git authentication."
         return 0
     fi
 
     # Check if user is authenticated with gh
     if ! gh auth status >/dev/null 2>&1; then
         log_warning "Not authenticated with GitHub CLI."
-        log_info "Run 'gh auth login' to authenticate before using Git operations."
+        log_info "Run 'gh auth login && gh auth setup-git' to authenticate before using Git operations."
         return 0
     fi
 
