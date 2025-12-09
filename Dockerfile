@@ -38,6 +38,7 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-reco
   pkg-config \
   # Development tools
   git \
+  bash-completion \
   jq \
   lsb-release \
   software-properties-common \
@@ -209,6 +210,13 @@ RUN chown -R node:node /workspaces/${WORKSPACE_NAME}
 RUN echo "alias ll='ls -alFh'" >> /home/node/.bashrc && \
   echo "alias la='ls -A'" >> /home/node/.bashrc && \
   echo "alias l='ls -CF'" >> /home/node/.bashrc
+
+# Enable bash completion including git-completion
+RUN echo "" >> /home/node/.bashrc && \
+  echo "# Enable bash completion" >> /home/node/.bashrc && \
+  echo "if [ -f /etc/bash_completion ]; then" >> /home/node/.bashrc && \
+  echo "  . /etc/bash_completion" >> /home/node/.bashrc && \
+  echo "fi" >> /home/node/.bashrc
 
 # Add health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \

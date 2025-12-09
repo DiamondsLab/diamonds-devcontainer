@@ -117,14 +117,14 @@ setup_git_credentials() {
 
     if ! command_exists gh; then
         log_warning "GitHub CLI (gh) not found. Skipping credential helper setup."
-        log_info "Install gh and run 'gh auth login' to enable Git authentication."
+        log_info "Install gh and run 'gh auth login && gh auth setup-git' to enable Git authentication."
         return 0
     fi
 
     # Check if user is authenticated with gh
     if ! gh auth status >/dev/null 2>&1; then
         log_warning "Not authenticated with GitHub CLI."
-        log_info "Run 'gh auth login' to authenticate before using Git operations."
+        log_info "Run 'gh auth login && gh auth setup-git' to authenticate before using Git operations."
         return 0
     fi
 
@@ -191,27 +191,41 @@ setup_snyk() {
     if snyk auth --help >/dev/null 2>&1; then
         log_info "Snyk CLI is available"
 
-        # Check authentication by testing a simple command
-        # Use 'config get' which doesn't require experimental flag and fails if not authenticated
-        if snyk config get >/dev/null 2>&1 || [ -n "${SNYK_TOKEN:-}" ]; then
-            if [ -n "${SNYK_TOKEN:-}" ]; then
-                log_success "Snyk is authenticated via SNYK_TOKEN environment variable"
-            else
-                log_success "Snyk is authenticated"
-            fi
-        else
-            log_warning "Snyk is not authenticated."
-            log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-            log_info "OAuth flow ('snyk auth') won't work in devcontainers."
-            log_info "Use token-based authentication instead:"
-            log_info ""
-            log_info "1. Get your token from: https://app.snyk.io/account"
-            log_info "2. Authenticate with: snyk auth <your-token>"
-            log_info "   OR set: export SNYK_TOKEN=<your-token>"
-            log_info "3. Add to .env file for persistence"
-            log_info "4. Run helper: .devcontainer/scripts/setup-snyk-auth.sh"
-            log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        # Check if already authenticated
+        if snyk whoami --experimental >/dev/null 2>&1; then
+            log_success "Snyk is already authenticated"
+            return 0
         fi
+
+        # Check for SNYK_TOKEN in .env file
+        local snyk_token=""
+        if [ -f .env ] && grep -q "^SNYK_TOKEN=" .env; then
+            snyk_token=$(grep "^SNYK_TOKEN=" .env | cut -d'=' -f2- | sed 's/^"//' | sed 's/"$//')
+            log_info "Found SNYK_TOKEN in .env file, attempting authentication..."
+        elif [ -f packages/diamonds/.env ] && grep -q "^SNYK_TOKEN=" packages/diamonds/.env; then
+            snyk_token=$(grep "^SNYK_TOKEN=" packages/diamonds/.env | cut -d'=' -f2- | sed 's/^"//' | sed 's/"$//')
+            log_info "Found SNYK_TOKEN in packages/diamonds/.env file, attempting authentication..."
+        fi
+
+        if [ -n "$snyk_token" ]; then
+            # Set the token and test authentication
+            export SNYK_TOKEN="$snyk_token"
+            if snyk whoami --experimental >/dev/null 2>&1; then
+                log_success "Snyk authenticated successfully using token from .env file"
+                return 0
+            else
+                log_warning "Failed to authenticate with SNYK_TOKEN from .env file"
+                unset SNYK_TOKEN
+            fi
+        fi
+
+        # If we reach here, authentication failed or no token was found
+        log_warning "Snyk is not authenticated."
+        log_info "To authenticate Snyk:"
+        log_info "  1. Visit https://app.snyk.io/account and generate an API token"
+        log_info "  2. Add 'SNYK_TOKEN=your_token_here' to your .env file"
+        log_info "  3. Or run 'snyk auth' manually (may not work in dev containers)"
+        log_info "Note: SNYK_TOKEN may require a paid Snyk plan for API access"
     else
         log_error "Snyk installation failed"
         return 1
