@@ -227,11 +227,28 @@ yarn security-check
 
 ### Authentication Setup
 
-```bash
-# Snyk authentication
-snyk auth
+#### Snyk Authentication (Token-Based)
 
-# Socket.dev setup
+OAuth flow doesn't work in devcontainers. Use token-based authentication:
+
+```bash
+# Option 1: Direct authentication with token
+# Get your token from: https://app.snyk.io/account
+snyk auth <your-token>
+
+# Option 2: Environment variable (recommended for persistence)
+export SNYK_TOKEN=<your-token>
+
+# Add to .env file for automatic loading
+echo "SNYK_TOKEN=your_snyk_token" >> .env
+
+# Verify authentication
+snyk whoami
+```
+
+#### Socket.dev Setup
+
+```bash
 export SOCKET_CLI_API_TOKEN=your_token
 ```
 

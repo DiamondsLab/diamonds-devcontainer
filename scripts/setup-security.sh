@@ -187,16 +187,30 @@ setup_snyk() {
         npm install -g snyk
     fi
 
-    # Check if Snyk is authenticated
+    # Check if Snyk is authenticated via token or OAuth
     if snyk auth --help >/dev/null 2>&1; then
         log_info "Snyk CLI is available"
 
-        # Check authentication status by looking for OAuth token storage
-        if snyk config | grep -q "INTERNAL_OAUTH_TOKEN_STORAGE"; then
-            log_success "Snyk is authenticated"
+        # Check authentication by testing a simple command
+        # Use 'config get' which doesn't require experimental flag and fails if not authenticated
+        if snyk config get >/dev/null 2>&1 || [ -n "${SNYK_TOKEN:-}" ]; then
+            if [ -n "${SNYK_TOKEN:-}" ]; then
+                log_success "Snyk is authenticated via SNYK_TOKEN environment variable"
+            else
+                log_success "Snyk is authenticated"
+            fi
         else
-            log_warning "Snyk is not authenticated. Run 'snyk auth' to authenticate."
-            log_info "You can also set SNYK_TOKEN environment variable (may require paid plan)"
+            log_warning "Snyk is not authenticated."
+            log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            log_info "OAuth flow ('snyk auth') won't work in devcontainers."
+            log_info "Use token-based authentication instead:"
+            log_info ""
+            log_info "1. Get your token from: https://app.snyk.io/account"
+            log_info "2. Authenticate with: snyk auth <your-token>"
+            log_info "   OR set: export SNYK_TOKEN=<your-token>"
+            log_info "3. Add to .env file for persistence"
+            log_info "4. Run helper: .devcontainer/scripts/setup-snyk-auth.sh"
+            log_info "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         fi
     else
         log_error "Snyk installation failed"
