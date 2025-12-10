@@ -1,29 +1,3 @@
-# syntax=docker/dockerfile:1.6
-
-###
-### Medusa build process
-###
-FROM golang:1.25 AS medusa
-
-WORKDIR /src
-RUN git clone https://github.com/crytic/medusa.git
-RUN cd medusa && \
-    export LATEST_TAG="$(git describe --tags | sed 's/-[0-9]\+-g\w\+$//')" && \
-    git checkout "$LATEST_TAG" && \
-    go build -trimpath -o=/usr/local/bin/medusa -ldflags="-s -w" && \
-    chmod 755 /usr/local/bin/medusa
-
-
-###
-### Echidna "build process"
-###
-FROM ghcr.io/crytic/echidna/echidna:latest AS echidna
-RUN chmod 755 /usr/local/bin/echidna
-
-
-###
-### Diamonds DevContainer - Main Stage
-###
 # Diamonds DevContainer Dockerfile
 # Optimized for security, performance, and Diamond Proxy development
 # Security approach: Node.js slim image (minimal attack surface), automatic security updates, pipx for Python tools
@@ -48,8 +22,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
   NODE_ENV=development \
   YARN_CACHE_FOLDER=/home/node/.yarn/cache \
   PATH="/home/node/.local/bin:/home/node/.npm-global/bin:/usr/local/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/node/go/bin" \
-  WORKSPACE_FOLDER=/workspaces/${WORKSPACE_NAME} \
-  QEMU_LD_PREFIX=/usr/x86_64-linux-gnu
+  WORKSPACE_FOLDER=/workspaces/${WORKSPACE_NAME}
 
 # Install system dependencies in a single layer for better caching
 # First update package lists and apply security updates
@@ -155,20 +128,6 @@ RUN git clone https://github.com/awslabs/git-secrets.git /tmp/git-secrets \
   && cd / \
   && rm -rf /tmp/git-secrets
 
-# Add cross-architecture support for ARM64/M1 Macs (improve compatibility with amd64 solc)
-RUN if [ ! "$(uname -m)" = "x86_64" ]; then \
-    export DEBIAN_FRONTEND=noninteractive \
-    && apt-get update \
-    && apt-get install -y --no-install-recommends libc6-amd64-cross \
-    && rm -rf /var/lib/apt/lists/*; fi
-
-# Copy Medusa and Echidna binaries from build stages (must run as root)
-COPY --chown=root:root --from=medusa /usr/local/bin/medusa /usr/local/bin/medusa
-COPY --chown=root:root --from=echidna /usr/local/bin/echidna /usr/local/bin/echidna
-
-# Configure Medusa bash completion (must run as root)
-RUN medusa completion bash > /etc/bash_completion.d/medusa
-
 # Switch to non-root user (already created by base Node.js image)
 USER node
 WORKDIR /home/node
@@ -189,15 +148,6 @@ RUN pipx install slither-analyzer \
 RUN pipx install bandit \
   && pipx install safety \
   && pipx install pip-audit
-
-# Install Trail of Bits Python security tools using pipx
-RUN pipx install pyevmasm \
-  && pipx install crytic-compile
-
-# Install Vyper compiler in virtual environment
-RUN python3 -m venv ${HOME}/.vyper && \
-    ${HOME}/.vyper/bin/pip3 install --no-cache-dir vyper && \
-    echo '\nexport PATH=${PATH}:${HOME}/.vyper/bin' >> /home/node/.bashrc
 
 # OSV-Scanner will be installed via post-create scripts after Go is available
 
