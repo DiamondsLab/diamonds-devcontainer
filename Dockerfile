@@ -268,6 +268,11 @@ RUN echo "" >> /home/node/.bashrc && \
   echo "  . /etc/bash_completion" >> /home/node/.bashrc && \
   echo "fi" >> /home/node/.bashrc
 
+# Set custom PS1 prompt to show only current directory name
+RUN echo "" >> /home/node/.bashrc && \
+  echo "# Custom prompt - show only current directory name" >> /home/node/.bashrc && \
+  echo 'export PS1="\[\033[01;32m\]\W\[\033[00m\] $ "' >> /home/node/.bashrc
+
 # Add health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
   CMD node --version && yarn --version && python3 --version && go version
