@@ -32,8 +32,9 @@ A comprehensive, reproducible development environment for the Diamonds Ethereum 
 4. **Initial setup** (runs automatically):
    - Dependencies installation
    - TypeScript/Solidity compilation
-   - Security tools configuration
+   - Security tools verification (Medusa, Echidna, Slither, etc.)
    - TypeChain types generation
+   - **Note**: All fuzzing tools are pre-installed in the Docker image for instant availability
 
 ## 📋 What's Included
 
@@ -53,12 +54,19 @@ A comprehensive, reproducible development environment for the Diamonds Ethereum 
 
 ### Security Tools
 
+- **Medusa** - Property-based fuzzing from Trail of Bits (pre-installed)
+- **Echidna** - Smart contract property-based fuzzer (pre-installed)
+- **Vyper** - Alternative smart contract language compiler (pre-installed)
+- **pyevmasm (evmasm)** - EVM assembler/disassembler (pre-installed)
+- **crytic-compile** - Multi-language contract compilation library (pre-installed)
 - **Semgrep** - Code security scanning
 - **Slither** - Solidity smart contract analysis
 - **Snyk** - Dependency vulnerability scanning
 - **Socket.dev** - Supply chain security
 - **OSV-Scanner** - Known vulnerability database
 - **git-secrets** - Secret detection and prevention
+
+**Note**: Trail of Bits security tools (Medusa, Echidna, Vyper, pyevmasm, crytic-compile) are baked into the Docker image for immediate availability and cross-architecture support (ARM64/M1 Macs).
 
 ### VS Code Extensions
 
