@@ -112,112 +112,8 @@ compile_solidity() {
     fi
 }
 
-# Function to install Medusa fuzzer
-install_medusa() {
-    log_info "Installing Medusa fuzzer..."
-
-    # Check if Medusa is already installed
-    if command_exists medusa; then
-        local current_version
-        current_version=$(medusa --version 2>/dev/null | grep -oP 'version \K[0-9.]+' || echo "unknown")
-        log_info "Medusa is already installed: $current_version"
-        return 0
-    fi
-
-    # Detect system architecture
-    local arch
-    arch=$(uname -m)
-    local medusa_arch=""
-    
-    case "$arch" in
-        x86_64|amd64)
-            medusa_arch="linux-x64"
-            ;;
-        aarch64|arm64)
-            medusa_arch="linux-arm64"
-            ;;
-        *)
-            log_error "Unsupported architecture: $arch"
-            log_warning "Medusa installation skipped. Manual installation may be required."
-            return 1
-            ;;
-    esac
-
-    log_info "Detected architecture: $arch (using medusa-$medusa_arch binary)"
-
-    # Get latest release URL from GitHub
-    local latest_release_url="https://api.github.com/repos/crytic/medusa/releases/latest"
-    local download_url
-    
-    log_info "Fetching latest Medusa release information..."
-    download_url=$(curl -s "$latest_release_url" | grep "browser_download_url.*medusa-${medusa_arch}.tar.gz\"" | cut -d '"' -f 4)
-
-    if [ -z "$download_url" ]; then
-        log_error "Failed to fetch Medusa download URL"
-        log_warning "Medusa installation skipped. You can install it manually from: https://github.com/crytic/medusa"
-        return 1
-    fi
-
-    log_info "Downloading Medusa from: $download_url"
-
-    # Create temporary directory for download
-    local temp_dir
-    temp_dir=$(mktemp -d)
-    
-    # Download Medusa
-    if curl -L -o "$temp_dir/medusa.tar.gz" "$download_url"; then
-        log_success "Medusa downloaded successfully"
-    else
-        log_error "Failed to download Medusa"
-        rm -rf "$temp_dir"
-        return 1
-    fi
-
-    # Extract archive
-    log_info "Extracting Medusa..."
-    if tar -xzf "$temp_dir/medusa.tar.gz" -C "$temp_dir"; then
-        log_success "Medusa extracted successfully"
-    else
-        log_error "Failed to extract Medusa"
-        rm -rf "$temp_dir"
-        return 1
-    fi
-
-    # Create local bin directory if it doesn't exist
-    mkdir -p "$HOME/.local/bin"
-
-    # Install to ~/.local/bin
-    log_info "Installing Medusa to ~/.local/bin/medusa..."
-    if mv "$temp_dir/medusa" "$HOME/.local/bin/medusa"; then
-        chmod +x "$HOME/.local/bin/medusa"
-        log_success "Medusa installed successfully"
-    else
-        log_error "Failed to install Medusa to ~/.local/bin"
-        rm -rf "$temp_dir"
-        return 1
-    fi
-
-    # Clean up
-    rm -rf "$temp_dir"
-
-    # Add to PATH if not already there
-    if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
-        export PATH="$HOME/.local/bin:$PATH"
-        log_info "Added ~/.local/bin to PATH for this session"
-    fi
-
-    # Verify installation
-    if command_exists medusa; then
-        local installed_version
-        installed_version=$(medusa --version 2>/dev/null | grep -oP 'version \K[0-9.]+' || echo "installed")
-        log_success "Medusa is now available: version $installed_version"
-        return 0
-    else
-        log_error "Medusa installation verification failed"
-        log_warning "You may need to add ~/.local/bin to your PATH manually"
-        return 1
-    fi
-}
+# Note: Medusa is now installed directly in the Docker image via multi-stage build
+# No runtime installation needed
 
 # Function to generate TypeChain types
 generate_typechain() {
@@ -409,6 +305,25 @@ verify_environment() {
         log_error "Git check failed"
     fi
 
+    # Check Medusa (pre-installed in Docker image)
+    ((total_checks++))
+    if command_exists medusa && medusa --version >/dev/null 2>&1; then
+        ((checks_passed++))
+        local medusa_version=$(medusa --version 2>/dev/null | grep -oP 'version \K[0-9.]+' || echo "unknown")
+        log_success "Medusa fuzzer available: version $medusa_version"
+    else
+        log_warning "Medusa fuzzer not found (should be pre-installed in Docker image)"
+    fi
+
+    # Check Echidna (pre-installed in Docker image)
+    ((total_checks++))
+    if command_exists echidna && echidna --version >/dev/null 2>&1; then
+        ((checks_passed++))
+        log_success "Echidna fuzzer available"
+    else
+        log_warning "Echidna fuzzer not found (should be pre-installed in Docker image)"
+    fi
+
     log_info "Environment verification: $checks_passed/$total_checks checks passed"
 }
 
@@ -503,6 +418,11 @@ display_next_steps() {
     echo "  yarn security-check - Run security scans"
     echo "  npx hardhat help  - Show Hardhat commands"
     echo
+    log_info "Pre-installed security fuzzing tools:"
+    echo "  medusa --version  - Medusa fuzzer (pre-installed in Docker image)"
+    echo "  echidna --version - Echidna fuzzer (pre-installed in Docker image)"
+    echo "  vyper --version   - Vyper smart contract compiler"
+    echo
     echo "If run during DevContainer creation, post-start setup should run automatically."
 }
 
@@ -516,7 +436,6 @@ main() {
     setup_git_config
     compile_typescript
     compile_solidity
-    install_medusa
     generate_typechain
     setup_husky_hooks
     run_linting
