@@ -75,14 +75,14 @@
     }
   },
   "forwardPorts": [
-    8545,
+    8547,
     8546,
-    3000,
+    3001,
     5000,
     8080
   ],
   "portsAttributes": {
-    "8545": {
+    "8547": {
       "label": "Hardhat Network",
       "onAutoForward": "notify"
     },
@@ -90,7 +90,7 @@
       "label": "Additional Blockchain Node",
       "onAutoForward": "silent"
     },
-    "3000": {
+    "3001": {
       "label": "Frontend Development",
       "onAutoForward": "silent"
     }
@@ -98,6 +98,7 @@
   "postCreateCommand": "bash .devcontainer/scripts/post-create.sh",
   "postStartCommand": "bash .devcontainer/scripts/post-start.sh",
   "postAttachCommand": "bash .devcontainer/scripts/setup-security.sh",
+  
   "remoteUser": "node",
   "overrideCommand": false,
   "shutdownAction": "stopCompose",
