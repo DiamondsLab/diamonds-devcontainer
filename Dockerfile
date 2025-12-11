@@ -230,7 +230,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
 # Security note: Post-create scripts will perform additional security validation and tool setup
 
 # Expose ports for development
-EXPOSE 8545 8546 3000 5000 8080
+EXPOSE 8545 8546 8555 8556 3000 5000 8080
 
 # Default command
 CMD ["sleep", "infinity"]

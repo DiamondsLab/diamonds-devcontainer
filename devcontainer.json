@@ -4,7 +4,7 @@
     "docker-compose.dev.yml"
   ],
   "service": "devcontainer",
-  "workspaceFolder": "/workspaces/diamonds_dev_env",
+  "workspaceFolder": "/workspaces/${localEnv:WORKSPACE_NAME:diamonds_project}",
   "initializeCommand": "cp ~/.gitconfig .devcontainer/.gitconfig.host 2>/dev/null || echo 'No host .gitconfig found'",
   "containerEnv": {
     "WORKSPACE_NAME": "diamonds_dev_env",
@@ -34,6 +34,7 @@
         "GitHub.copilot-chat",
         "eamodio.gitlens",
         "usernamehw.errorlens",
+        "github.vscode-pull-request-github",
         "github.vscode-github-actions",
         "ms-python.python",
         "ms-vscode.vscode-markdown",
@@ -75,23 +76,36 @@
     }
   },
   "forwardPorts": [
-    8547,
-    8546,
+    8555,
+    8556,
+    8201,
     3001,
-    5000,
-    8080
+    5001,
+    8081
   ],
   "portsAttributes": {
-    "8547": {
+    "8555": {
       "label": "Hardhat Network",
       "onAutoForward": "notify"
     },
-    "8546": {
+    "8556": {
       "label": "Additional Blockchain Node",
+      "onAutoForward": "silent"
+    },
+    "8201": {
+      "label": "Vault Dev Server",
       "onAutoForward": "silent"
     },
     "3001": {
       "label": "Frontend Development",
+      "onAutoForward": "silent"
+    },
+    "5001": {
+      "label": "API/Backend",
+      "onAutoForward": "silent"
+    },
+    "8081": {
+      "label": "Documentation/Other",
       "onAutoForward": "silent"
     }
   },

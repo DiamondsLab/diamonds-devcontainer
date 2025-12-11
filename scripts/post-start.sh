@@ -215,16 +215,19 @@ setup_development_server() {
     if [ "${START_HARDHAT_NETWORK:-false}" == "true" ]; then
         log_info "Starting Hardhat network in background..."
 
-        # Check if port 8545 is already in use
+        # Get port from environment or use default
+        local hardhat_port="${HARDHAT_PORT:-8555}"
+
+        # Check if port is already in use
         if command -v lsof >/dev/null 2>&1; then
-            if lsof -Pi :8545 -sTCP:LISTEN -t >/dev/null 2>&1; then
-                log_info "Hardhat network already running on port 8545"
+            if lsof -Pi :${hardhat_port} -sTCP:LISTEN -t >/dev/null 2>&1; then
+                log_info "Hardhat network already running on port ${hardhat_port}"
                 return 0
             fi
         else
             # Fallback: try to connect to the port
-            if timeout 1s bash -c 'cat < /dev/null > /dev/tcp/localhost/8545' 2>/dev/null; then
-                log_info "Hardhat network already running on port 8545"
+            if timeout 1s bash -c "cat < /dev/null > /dev/tcp/localhost/${hardhat_port}" 2>/dev/null; then
+                log_info "Hardhat network already running on port ${hardhat_port}"
                 return 0
             fi
         fi

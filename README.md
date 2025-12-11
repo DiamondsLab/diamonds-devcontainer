@@ -329,7 +329,7 @@ slither --version
 # Check port usage
 lsof -i :8545
 
-# Change ports in docker-compose.yml
+# Change ports in docker-compose.yml or configure in .env
 ports:
   - "8547:8545"  # Map host 8547 to container 8545
 ```
@@ -370,7 +370,7 @@ npx hardhat compile --parallel
 # Test network connectivity
 curl -X POST -H "Content-Type: application/json" \
   --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' \
-  http://localhost:8545
+  http://localhost:${HARDHAT_PORT:-8545}
 ```
 
 #### Infura/Alchemy Issues
