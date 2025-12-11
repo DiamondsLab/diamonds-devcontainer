@@ -76,36 +76,27 @@
     }
   },
   "forwardPorts": [
-    8555,
-    8556,
-    8201,
-    3001,
-    5001,
-    8081
+    8545,
+    8546,
+    3000,
+    5000,
+    8080
   ],
   "portsAttributes": {
-    "8555": {
+    "8545": {
       "label": "Hardhat Network",
       "onAutoForward": "notify"
     },
-    "8556": {
+    "8546": {
       "label": "Additional Blockchain Node",
       "onAutoForward": "silent"
     },
-    "8201": {
+    "8200": {
       "label": "Vault Dev Server",
       "onAutoForward": "silent"
     },
-    "3001": {
+    "3000": {
       "label": "Frontend Development",
-      "onAutoForward": "silent"
-    },
-    "5001": {
-      "label": "API/Backend",
-      "onAutoForward": "silent"
-    },
-    "8081": {
-      "label": "Documentation/Other",
       "onAutoForward": "silent"
     }
   },
