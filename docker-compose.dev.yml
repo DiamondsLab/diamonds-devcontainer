@@ -121,9 +121,9 @@ services:
       - ..:/workspaces/${WORKSPACE_NAME:-diamonds_project}:cached
       - ../node_modules:/workspaces/${WORKSPACE_NAME:-diamonds_project}/node_modules:ro
     working_dir: /workspaces/${WORKSPACE_NAME:-diamonds_project}
-    command: npx hardhat node --hostname 0.0.0.0 --port 8545
+    command: npx hardhat node --hostname 0.0.0.0 --port ${HARDHAT_PORT:-8545}
     ports:
-      - "${HARDHAT_PORT:-8555}:8545"
+      - "${HARDHAT_PORT:-8545}:8545"
     environment:
       - NODE_ENV=development
       - WORKSPACE_NAME=${WORKSPACE_NAME:-diamonds_project}

@@ -7,7 +7,7 @@
   "workspaceFolder": "/workspaces/${localEnv:WORKSPACE_NAME:diamonds_project}",
   "initializeCommand": "cp ~/.gitconfig .devcontainer/.gitconfig.host 2>/dev/null || echo 'No host .gitconfig found'",
   "containerEnv": {
-    "WORKSPACE_NAME": "diamonds_dev_env",
+    "WORKSPACE_NAME": "${localEnv:WORKSPACE_NAME:diamonds_project}",
     "DIAMOND_NAME": "ExampleDiamond",
     "NODE_ENV": "development",
     "HARDHAT_NETWORK": "hardhat",
@@ -103,7 +103,6 @@
   "postCreateCommand": "bash .devcontainer/scripts/post-create.sh",
   "postStartCommand": "bash .devcontainer/scripts/post-start.sh",
   "postAttachCommand": "bash .devcontainer/scripts/setup-security.sh",
-  
   "remoteUser": "node",
   "overrideCommand": false,
   "shutdownAction": "stopCompose",
