@@ -195,14 +195,29 @@ fallback_to_env() {
 }
 
 # Validate critical secrets
+# Checks both environment variables and root directory .env file
 validate_critical_secrets() {
     # local critical_secrets=("PRIVATE_KEY" "TEST_PRIVATE_KEY")
     local critical_secrets=("TEST_PRIVATE_KEY")
     local missing_critical=()
+    local root_env_file="${PROJECT_ROOT}/.env"
 
     for secret in "${critical_secrets[@]}"; do
+        # First check if already loaded in environment
         if [ -z "${!secret:-}" ]; then
-            missing_critical+=("$secret")
+            # Not in environment, check root .env file
+            if [ -f "$root_env_file" ]; then
+                local value
+                value=$(grep "^${secret}=" "$root_env_file" 2>/dev/null | cut -d'=' -f2- | sed 's/^"\(.*\)"$/\1/;s/^'\''\(.*\)'\''$/\1/')
+                if [ -n "$value" ]; then
+                    export "$secret"="$value"
+                    log_info "Loaded $secret from root .env file"
+                else
+                    missing_critical+=("$secret")
+                fi
+            else
+                missing_critical+=("$secret")
+            fi
         fi
     done
 
@@ -215,6 +230,7 @@ validate_critical_secrets() {
 
         log_error "Critical secrets missing: ${missing_critical[*]}"
         log_error "Cannot continue without critical secrets"
+        log_info "Checked locations: environment variables and $root_env_file"
         return 1
     fi
 

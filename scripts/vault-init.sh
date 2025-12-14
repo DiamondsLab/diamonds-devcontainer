@@ -153,11 +153,11 @@ setup_github_auth() {
 
     # Configure GitHub auth with organization
     # TODO: This needs to be configured or picked up from git via `gh` client to supply the actual organization
-    # It shouldn't be referencing GeniusVentures directly but could also look to a variety of .env or config files including the `~/.vault_token` or `.vault_token` file in the project root.
+    # It shouldn't be referencing diamondlabs directly but could also look to a variety of .env or config files including the `~/.vault_token` or `.vault_token` file in the project root.
     curl -s -X POST \
         -H "X-Vault-Token: $VAULT_TOKEN" \
         -d '{
-            "organization": "GeniusVentures",
+            "organization": "diamondlabs",
             "base_url": "https://api.github.com"
         }' \
         "$VAULT_ADDR/v1/auth/github/config" || {
@@ -218,7 +218,7 @@ create_policies() {
 setup_github_team_mappings() {
     log_info "Setting up GitHub team to policy mappings..."
 
-    # Map GeniusVentures organization members to dev-policy
+    # Map diamondlabs organization members to dev-policy
     curl -s -X POST \
         -H "X-Vault-Token: $VAULT_TOKEN" \
         -d '{"value": "dev-policy"}' \

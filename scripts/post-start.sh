@@ -87,33 +87,7 @@ check_dependency_updates() {
         fi
     fi
 }
-
-# Function to setup environment variables
-setup_environment_variables() {
-    log_info "Setting up environment variables..."
-
-    # Load .env file if it exists
-    if [ -f ".env" ]; then
-        log_info "Loading environment variables from .env"
-        # Export all variables from .env (excluding comments and empty lines)
-        set -a
-        source .env
-        set +a
-    else
-        log_warning ".env file not found. Copy from .env.example if needed"
-    fi
-
-    # Set default values for missing environment variables
-    export NODE_ENV=${NODE_ENV:-development}
-    export HARDHAT_NETWORK=${HARDHAT_NETWORK:-hardhat}
-    export CI_MODE=${CI_MODE:-false}
-    export GAS_REPORTER_ENABLED=${GAS_REPORTER_ENABLED:-false}
-    export REPORT_GAS=${REPORT_GAS:-false}
-
-    log_success "Environment variables configured"
-}
-
-# Function to check security tools
+tion to check security tools
 check_security_tools() {
     log_info "Checking security tools status..."
 
@@ -591,7 +565,6 @@ main() {
     # Run all setup functions
     check_environment_health
     check_dependency_updates
-    setup_environment_variables
     check_security_tools
     check_git_status
     setup_development_server

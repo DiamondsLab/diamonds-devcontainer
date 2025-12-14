@@ -21,8 +21,9 @@ ENV DEBIAN_FRONTEND=noninteractive \
   PIP_DISABLE_PIP_VERSION_CHECK=1 \
   NODE_ENV=development \
   YARN_CACHE_FOLDER=/home/node/.yarn/cache \
-  PATH="/home/node/.local/bin:/home/node/.npm-global/bin:/usr/local/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/node/go/bin" \
-  WORKSPACE_FOLDER=/workspaces/${WORKSPACE_NAME}
+  PATH="/home/node/.local/bin:/home/node/.npm-global/bin:/usr/local/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/node/go/bin" 
+  # WORKSPACE_FOLDER=/workspaces/${WORKSPACE_NAME:-diamonds_project} \
+  # WORKSPACE_NAME=${WORKSPACE_NAME:-diamonds_project}
 
 # Install system dependencies in a single layer for better caching
 # First update package lists and apply security updates

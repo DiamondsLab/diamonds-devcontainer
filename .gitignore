@@ -79,4 +79,10 @@ docker-compose.local.yml
 *.tmp
 
 data
+
+# Ignore Flatten files
+flat
+
+# Ignore generated file, keep template
 devcontainer.json
+!devcontainer.template.json

@@ -9,10 +9,10 @@
 cd /path/to/your/project
 
 # Add devcontainer as submodule
-git submodule add https://github.com/GeniusVentures/diamonds-monitor-dev.git .devcontainer
+git submodule add https://github.com/diamondlabs/diamonds-monitor-dev.git .devcontainer
 
 # Or if using SSH
-git submodule add git@github.com:GeniusVentures/diamonds-monitor-dev.git .devcontainer
+git submodule add git@github.com:diamondlabs/diamonds-monitor-dev.git .devcontainer
 
 # Configure workspace name
 cp .devcontainer/.env.example .devcontainer/.env

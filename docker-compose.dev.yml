@@ -13,6 +13,9 @@ services:
         NODE_VERSION: 20
         PYTHON_VERSION: 3.11
         WORKSPACE_NAME: ${WORKSPACE_NAME:-diamonds_project}
+    # Use env_file to load .env
+    env_file:
+      - .env
     volumes:
       # Project source code
       - ..:/workspaces/${WORKSPACE_NAME:-diamonds_project}:cached
@@ -21,10 +24,12 @@ services:
       - yarn-cache:/home/node/.yarn/cache
       - node-modules:/workspaces/${WORKSPACE_NAME:-diamonds_project}/node_modules
       - hardhat-artifacts:/workspaces/${WORKSPACE_NAME:-diamonds_project}/artifacts
+      # TODO This may not be necessary and may change in v2.27.0 of Hardhat
       - hardhat-cache:/workspaces/${WORKSPACE_NAME:-diamonds_project}/cache
       - diamond-abi:/workspaces/${WORKSPACE_NAME:-diamonds_project}/diamond-abi
       - diamond-typechain:/workspaces/${WORKSPACE_NAME:-diamonds_project}/diamond-typechain-types
       - typechain-types:/workspaces/${WORKSPACE_NAME:-diamonds_project}/typechain-types
+      # TODO  Consider Removing reports volume if not needed
       - reports:/workspaces/${WORKSPACE_NAME:-diamonds_project}/reports
 
       # SSH and Git configuration
@@ -50,6 +55,7 @@ services:
       - PYTHONUNBUFFERED=1
       - PIP_DISABLE_PIP_VERSION_CHECK=1
       - WORKSPACE_NAME=${WORKSPACE_NAME:-diamonds_project}
+      - WORKSPACE_FOLDER=/workspaces/${WORKSPACE_NAME:-diamonds_project}
       - VAULT_ADDR=http://vault-dev:8200
       - DIAMOND_NAME=${DIAMOND_NAME:-ExampleDiamond}
     networks:
@@ -145,6 +151,7 @@ volumes:
   diamond-abi:
   diamond-typechain:
   typechain-types:
+  # TODO this will have to be removed if reports volume is not needed
   reports:
   vault-data:
   vault-config:
@@ -153,4 +160,5 @@ volumes:
 # Networks for inter-service communication
 networks:
   project-network:
+    name: ${WORKSPACE_NAME:-diamonds_project}-network
     driver: bridge

@@ -155,7 +155,7 @@ Persistent mode uses the Raft consensus algorithm for storage:
 
 ```bash
 # Clone the repository
-git clone https://github.com/GeniusVentures/diamonds-base.git
+git clone https://github.com/diamondslab/diamonds-base.git
 cd diamonds-base
 
 # Set up GitHub token for Vault authentication

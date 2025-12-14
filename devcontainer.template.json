@@ -4,11 +4,16 @@
     "docker-compose.dev.yml"
   ],
   "service": "devcontainer",
-  "workspaceFolder": "/workspaces/${localEnv:WORKSPACE_NAME:diamonds_project}",
-  "initializeCommand": "cp ~/.gitconfig .devcontainer/.gitconfig.host 2>/dev/null || echo 'No host .gitconfig found'",
+  "workspaceFolder": "/workspaces/__WORKSPACE_NAME__",
+  "initializeCommand": "python3 .devcontainer/scripts/init-devcontainer.py || python .devcontainer/scripts/init-devcontainer.py",
+  "remoteEnv": {
+    "WORKSPACE_NAME": "__WORKSPACE_NAME__",
+    "WORKSPACE_FOLDER": "/workspaces/__WORKSPACE_NAME__"
+  },
   "containerEnv": {
-    "WORKSPACE_NAME": "${localEnv:WORKSPACE_NAME:diamonds_project}",
-    "DIAMOND_NAME": "ExampleDiamond",
+    "WORKSPACE_NAME": "__WORKSPACE_NAME__",
+    "WORKSPACE_FOLDER": "/workspaces/__WORKSPACE_NAME__",
+    "DIAMOND_NAME": "__DIAMOND_NAME__",
     "NODE_ENV": "development",
     "HARDHAT_NETWORK": "hardhat",
     "YARN_ENABLE_IMMUTABLE_INSTALLS": "false",
@@ -80,7 +85,8 @@
     8546,
     3000,
     5000,
-    8080
+    8080,
+    8200
   ],
   "portsAttributes": {
     "8545": {
