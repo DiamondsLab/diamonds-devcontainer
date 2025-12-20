@@ -83,8 +83,8 @@ WORKSPACE_NAME=diamonds_project
 DIAMOND_NAME=ExampleDiamond
 
 # Vault Configuration
-VAULT_COMMAND=server -dev -dev-root-token-id=root -dev-listen-address=0.0.0.0:8200
-VAULT_PORT=8200
+VAULT_COMMAND=server -dev -dev-root-token-id=root -dev-listen-address=0.0.0.0:8201
+VAULT_PORT=8201
 
 # Port Mappings
 HARDHAT_PORT=8545
@@ -119,6 +119,7 @@ def generate_devcontainer(
     # Get values with defaults
     workspace_name = env_vars.get('WORKSPACE_NAME', 'diamonds_project')
     diamond_name = env_vars.get('DIAMOND_NAME', 'ExampleDiamond')
+    vault_port = env_vars.get('VAULT_PORT', '8201')
     
     # Validate workspace name (must be valid for Docker)
     if not workspace_name.replace('_', '').replace('-', '').isalnum():
@@ -140,6 +141,7 @@ def generate_devcontainer(
         output = template
         output = output.replace('__WORKSPACE_NAME__', workspace_name)
         output = output.replace('__DIAMOND_NAME__', diamond_name)
+        output = output.replace('__VAULT_PORT__', vault_port)
         
         # Validate JSON
         try:
@@ -155,6 +157,7 @@ def generate_devcontainer(
         log(f"✓ Generated devcontainer.json", Colors.GREEN)
         log(f"  WORKSPACE_NAME: {Colors.BLUE}{workspace_name}{Colors.NC}")
         log(f"  DIAMOND_NAME: {Colors.BLUE}{diamond_name}{Colors.NC}")
+        log(f"  VAULT_PORT: {Colors.BLUE}{vault_port}{Colors.NC}")
         
     except Exception as e:
         log(f"Error generating devcontainer.json: {e}", Colors.RED)
@@ -164,6 +167,7 @@ def generate_devcontainer(
     # This makes them available to VS Code via ${localEnv:WORKSPACE_NAME}
     os.environ['WORKSPACE_NAME'] = workspace_name
     os.environ['DIAMOND_NAME'] = diamond_name
+    os.environ['VAULT_PORT'] = vault_port
     
     # Export all other variables from .env as well
     for key, value in env_vars.items():

@@ -159,14 +159,13 @@ RUN curl -L https://foundry.paradigm.xyz | bash \
 
 # Set up global npm packages (security tools)
 # Note: @openzeppelin/cli removed as it's deprecated; use @openzeppelin/hardhat-upgrades in project dependencies instead
-RUN npm config set prefix /home/node/.npm-global \
-  && export PATH="/home/node/.npm-global/bin:$PATH" \
-  && npm install -g semver \
-  && npm install -g \
-  snyk \
-  @socketsecurity/cli \
-  ganache \
-  hardhat-shorthand
+RUN npm config set prefix /home/node/.npm-global
+RUN export PATH="/home/node/.npm-global/bin:$PATH"
+RUN npm install -g semver
+RUN npm install -g  snyk
+RUN npm install -g  @socketsecurity/cli 
+RUN npm install -g  ganache
+RUN npm install -g  hardhat-shorthand
 
 # Workspace directory already created above, just set workdir
 WORKDIR /workspaces/${WORKSPACE_NAME}

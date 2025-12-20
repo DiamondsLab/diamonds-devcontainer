@@ -1,5 +1,3 @@
-version: "3.8"
-
 # Diamonds DevContainer Docker Compose Configuration
 # Provides multi-service development environment
 

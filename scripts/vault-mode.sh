@@ -33,7 +33,8 @@ log_warning() {
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 MODE_CONF="${PROJECT_ROOT}/.devcontainer/data/vault-mode.conf"
-ENV_FILE="${PROJECT_ROOT}/.devcontainer/.env"
+DEVCONTAINER_ENV="${PROJECT_ROOT}/.devcontainer/.env"  # For Docker Compose only - DO NOT MODIFY
+PROJECT_ENV="${PROJECT_ROOT}/.env"  # Project secrets and configuration
 COMPOSE_FILE="${PROJECT_ROOT}/.devcontainer/docker-compose.dev.yml"
 MIGRATE_SCRIPT="${SCRIPT_DIR}/vault-migrate-mode.sh"
 
@@ -69,7 +70,12 @@ Examples:
 More Information:
   - Configuration: $MODE_CONF
   - Migration script: $MIGRATE_SCRIPT
-  - Environment file: $ENV_FILE
+  - DevContainer env (Docker only): $DEVCONTAINER_ENV
+  - Project env (secrets): $PROJECT_ENV
+
+Note:
+  - .devcontainer/.env is for Docker Compose configuration only
+  - $PROJECT_ROOT/.env is for project secrets and should be used with Vault
 
 EOF
 }
@@ -222,21 +228,17 @@ update_docker_compose_env() {
         vault_command="server -dev -dev-root-token-id=root -dev-listen-address=0.0.0.0:8200"
     fi
     
-    # Update .env file
-    if [[ -f "$ENV_FILE" ]]; then
-        if grep -q "^VAULT_COMMAND=" "$ENV_FILE"; then
-            if [[ "$OSTYPE" == "darwin"* ]]; then
-                sed -i '' "s|^VAULT_COMMAND=.*|VAULT_COMMAND=$vault_command|" "$ENV_FILE"
-            else
-                sed -i "s|^VAULT_COMMAND=.*|VAULT_COMMAND=$vault_command|" "$ENV_FILE"
-            fi
-        else
-            echo "VAULT_COMMAND=$vault_command" >> "$ENV_FILE"
-        fi
-        log_success "Docker Compose environment updated"
-    else
-        log_warning ".env file not found"
-    fi
+    # Update vault-mode.conf (this is the authoritative source for Vault mode)
+    mkdir -p "$(dirname "$MODE_CONF")"
+    cat > "$MODE_CONF" <<EOF
+VAULT_MODE="$target_mode"
+AUTO_UNSEAL="false"
+VAULT_COMMAND="$vault_command"
+EOF
+    
+    log_success "Docker Compose environment updated in vault-mode.conf"
+    log_info "Note: .devcontainer/.env is for Docker Compose only and is not modified"
+    log_info "Project secrets are managed in $PROJECT_ENV"
 }
 
 # Restart Vault service (Task 8.5)

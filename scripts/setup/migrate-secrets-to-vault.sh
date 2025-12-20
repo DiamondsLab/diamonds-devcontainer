@@ -2,6 +2,22 @@
 # migrate-secrets-to-vault.sh
 # Script to migrate secrets from .env file to HashiCorp Vault
 # This script safely moves sensitive configuration to Vault while maintaining backups
+#
+# IMPORTANT: This script operates on PROJECT_ROOT/.env ONLY
+# - .devcontainer/.env is for Docker Compose configuration only (not modified)
+# - Project secrets should be in PROJECT_ROOT/.env
+#
+# Environment Variables:
+#   KEEP_ENV_UNCHANGED=true   - Copy secrets to Vault without removing from .env
+#   VAULT_MODE=ephemeral      - Automatically sets KEEP_ENV_UNCHANGED=true
+#   VAULT_MODE=persistent     - Removes secrets from .env (unless KEEP_ENV_UNCHANGED=true)
+#
+# Usage:
+#   # Migrate secrets (remove from .env):
+#   ./migrate-secrets-to-vault.sh
+#
+#   # Copy secrets (keep in .env as fallback):
+#   KEEP_ENV_UNCHANGED=true ./migrate-secrets-to-vault.sh
 
 set -euo pipefail
 
@@ -164,8 +180,14 @@ create_backup() {
 migrate_secrets() {
     local env_file="$1"
     local vault_path="${2:-secret/dev}"
+    local keep_unchanged="${3:-false}"
 
     log_info "Starting secret migration from ${env_file} to Vault path: ${vault_path}"
+    if [[ "$keep_unchanged" == "true" ]]; then
+        log_info "Mode: COPY (will not modify .env file)"
+    else
+        log_info "Mode: MIGRATE (will remove secrets from .env file)"
+    fi
 
     local secrets_found=0
     local secrets_migrated=0
@@ -204,8 +226,12 @@ migrate_secrets() {
 
     log_info "Found ${secrets_found} secrets, migrated ${secrets_migrated} secrets"
 
-    # Only update .env file if there were secrets to migrate
-    if [[ $secrets_found -gt 0 ]]; then
+    # Only update .env file if requested and there were secrets to migrate
+    if [[ "$keep_unchanged" == "true" ]]; then
+        log_info "KEEP_ENV_UNCHANGED=true - .env file will not be modified"
+        log_info "Secrets copied to Vault: $secrets_migrated"
+        log_info ".env file remains unchanged as fallback for secret retrieval"
+    elif [[ $secrets_found -gt 0 ]]; then
         log_info "Creating new .env file with non-secret variables..."
         # Create new .env file with only non-secret variables
         {
@@ -288,9 +314,25 @@ validate_migration() {
 main() {
     local env_file="${PROJECT_ROOT}/.env"
     local vault_path="secret/dev"
+    local keep_env_unchanged="${KEEP_ENV_UNCHANGED:-false}"
 
     log_info "Secret Migration to Vault"
     log_info "=================================="
+    log_info "Operating on: ${env_file}"
+    log_info "Note: .devcontainer/.env is NOT modified (Docker Compose only)"
+    echo
+
+    # Check environment variable for keeping .env unchanged
+    if [[ "${VAULT_MODE:-ephemeral}" == "ephemeral" ]]; then
+        keep_env_unchanged="true"
+        log_info "Running in EPHEMERAL mode - .env file will remain unchanged"
+    fi
+
+    if [[ "$keep_env_unchanged" == "true" ]]; then
+        log_info "KEEP_ENV_UNCHANGED=true - .env file will not be modified"
+        log_info "Secrets will be copied to Vault but remain in .env as fallback"
+    fi
+    echo
 
     # Load secret patterns from configuration file
     load_secret_patterns
@@ -309,17 +351,24 @@ main() {
     backup_file=$(create_backup "$env_file")
 
     # Migrate secrets
-    migrate_secrets "$env_file" "$vault_path"
+    migrate_secrets "$env_file" "$vault_path" "$keep_env_unchanged"
 
-    log_info "Migration completed, starting validation..."
-
-    # Validate migration
-    validate_migration "$env_file" "$vault_path"
+    if [[ "$keep_env_unchanged" != "true" ]]; then
+        log_info "Migration completed, starting validation..."
+        # Validate migration only if .env was modified
+        validate_migration "$env_file" "$vault_path"
+    else
+        log_info "Secrets copied to Vault, .env file unchanged (fallback mode)"
+    fi
 
     log_success "Secret migration completed successfully!"
     log_info "Backup created: ${backup_file}"
     log_info "To restore from backup: cp '${backup_file}' '${env_file}'"
     log_info "To retrieve secrets: .devcontainer/scripts/vault-fetch-secrets.sh"
+    
+    if [[ "$keep_env_unchanged" == "true" ]]; then
+        log_info "\nNote: .env file was not modified - secrets remain as fallback"
+    fi
 }
 
 # Run main function

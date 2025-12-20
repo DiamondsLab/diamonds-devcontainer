@@ -511,7 +511,6 @@ main() {
     log_info "Starting Diamonds post-create setup..."
 
     # Run setup steps
-    install_vault_cli
     install_dependencies
     setup_git_config
     compile_typescript
@@ -524,7 +523,9 @@ main() {
     setup_hardhat_config
     setup_multichain_testing
     verify_environment
-    fetch_vault_secrets
+    # NOTE: Vault setup and secret migration are manual operations
+    # Run manually: .devcontainer/scripts/setup/vault-setup-wizard.sh
+    # And: .devcontainer/scripts/setup/migrate-secrets-to-vault.sh
 
     # Display next steps
     display_next_steps

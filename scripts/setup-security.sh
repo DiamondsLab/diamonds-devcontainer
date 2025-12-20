@@ -199,11 +199,11 @@ setup_snyk() {
 
         # Check for SNYK_TOKEN in .env file
         local snyk_token=""
-        if [ -f .env ] && grep -q "^SNYK_TOKEN=" .env; then
-            snyk_token=$(grep "^SNYK_TOKEN=" .env | cut -d'=' -f2- | sed 's/^"//' | sed 's/"$//')
+        if [ -f "$PROJECT_ROOT/.env" ] && grep -q "^SNYK_TOKEN=" "$PROJECT_ROOT/.env"; then
+            snyk_token=$(grep "^SNYK_TOKEN=" "$PROJECT_ROOT/.env" | cut -d'=' -f2- | sed 's/^"//' | sed 's/"$//')
             log_info "Found SNYK_TOKEN in .env file, attempting authentication..."
-        elif [ -f packages/diamonds/.env ] && grep -q "^SNYK_TOKEN=" packages/diamonds/.env; then
-            snyk_token=$(grep "^SNYK_TOKEN=" packages/diamonds/.env | cut -d'=' -f2- | sed 's/^"//' | sed 's/"$//')
+        elif [ -f "$PROJECT_ROOT/packages/diamonds/.env" ] && grep -q "^SNYK_TOKEN=" "$PROJECT_ROOT/packages/diamonds/.env"; then
+            snyk_token=$(grep "^SNYK_TOKEN=" "$PROJECT_ROOT/packages/diamonds/.env" | cut -d'=' -f2- | sed 's/^"//' | sed 's/"$//')
             log_info "Found SNYK_TOKEN in packages/diamonds/.env file, attempting authentication..."
         fi
 
@@ -245,7 +245,7 @@ setup_socket() {
         log_success "Socket.dev CLI is ready"
 
         # Check if API token is configured in .env file
-        if [ -f .env ] && grep -q "^SOCKET_CLI_API_TOKEN=" .env; then
+        if [ -f "$PROJECT_ROOT/.env" ] && grep -q "^SOCKET_CLI_API_TOKEN=" "$PROJECT_ROOT/.env"; then
             log_success "Socket.dev API token is configured in .env"
         else
             log_warning "SOCKET_CLI_API_TOKEN not set in .env file. Set it in .env for full functionality."
@@ -421,6 +421,10 @@ run_security_health_check() {
 # Main execution
 main() {
     log_info "Starting Diamonds security tools setup..."
+
+    # Determine project root
+    PROJECT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+    log_info "Project root determined as: $PROJECT_ROOT"
 
     # Setup each security tool
     setup_git_secrets

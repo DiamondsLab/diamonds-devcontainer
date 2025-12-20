@@ -1,1 +1,0 @@
-migrate-secrets-to-vault.sh

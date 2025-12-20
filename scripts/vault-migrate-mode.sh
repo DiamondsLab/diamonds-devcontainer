@@ -257,7 +257,6 @@ import_secrets_from_backup() {
 # Update Docker Compose environment (Task 7.3 helper)
 update_docker_compose_env() {
     local target_mode="$1"
-    local env_file="${PROJECT_ROOT}/.devcontainer/.env"
     local mode_conf="${PROJECT_ROOT}/.devcontainer/data/vault-mode.conf"
     
     log_info "Updating Docker Compose configuration for $target_mode mode..."
@@ -270,7 +269,7 @@ update_docker_compose_env() {
         vault_command="server -dev -dev-root-token-id=root -dev-listen-address=0.0.0.0:8200"
     fi
     
-    # Update vault-mode.conf
+    # Update vault-mode.conf (this is the only file that should be modified)
     mkdir -p "$(dirname "$mode_conf")"
     cat > "$mode_conf" <<EOF
 VAULT_MODE="$target_mode"
@@ -278,20 +277,9 @@ AUTO_UNSEAL="false"
 VAULT_COMMAND="$vault_command"
 EOF
     
-    # Update .env file
-    if [[ -f "$env_file" ]]; then
-        if grep -q "^VAULT_COMMAND=" "$env_file"; then
-            if [[ "$OSTYPE" == "darwin"* ]]; then
-                sed -i '' "s|^VAULT_COMMAND=.*|VAULT_COMMAND=$vault_command|" "$env_file"
-            else
-                sed -i "s|^VAULT_COMMAND=.*|VAULT_COMMAND=$vault_command|" "$env_file"
-            fi
-        else
-            echo "VAULT_COMMAND=$vault_command" >> "$env_file"
-        fi
-    fi
-    
     log_success "Configuration updated for $target_mode mode"
+    log_info "Note: .devcontainer/.env is for Docker Compose only and is not modified"
+    log_info "Project secrets are managed in $PROJECT_ROOT/.env"
 }
 
 # Ephemeral to Persistent migration (Task 7.3)

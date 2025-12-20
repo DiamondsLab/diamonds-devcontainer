@@ -1,5 +1,3 @@
-version: "3.8"
-
 # Diamonds DevContainer Docker Compose Configuration with Vault Integration
 # Provides multi-service development environment with secure secret management
 
@@ -36,8 +34,8 @@ services:
       - ~/.ssh:/home/node/.ssh:ro
       # - ~/.gitconfig:/home/node/.gitconfig  # Removed bind mount to avoid device busy errors
 
-      # Environment file
-      - ./.env:/workspaces/${WORKSPACE_NAME:-diamonds_project}/.env
+      # NOTE: .devcontainer/.env is loaded via env_file above for Docker Compose config
+      # Project .env file is separate and managed by vault scripts
 
     working_dir: /workspaces/${WORKSPACE_NAME:-diamonds_project}
     command: sleep infinity

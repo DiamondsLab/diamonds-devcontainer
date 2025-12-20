@@ -106,7 +106,8 @@ setup_environment_variables() {
     export CI_MODE=${CI_MODE:-false}
     export GAS_REPORTER_ENABLED=${GAS_REPORTER_ENABLED:-false}
     export REPORT_GAS=${REPORT_GAS:-false}
-
+    export HARDHAT_DISABLE_TELEMETRY=1
+    
     log_success "Environment variables configured"
 }
 
