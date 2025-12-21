@@ -515,7 +515,7 @@ main() {
     setup_git_config
     compile_typescript
     compile_solidity
-    install_medusa
+    # install_medusa
     generate_typechain
     setup_husky_hooks
     run_linting
