@@ -222,6 +222,9 @@ RUN echo "" >> /home/node/.bashrc && \
 RUN echo "" >> /home/node/.bashrc && \
   echo "# Custom prompt - show only current directory name" >> /home/node/.bashrc && \
   echo 'export PS1="\[\033[01;32m\]\W\[\033[00m\] $ "' >> /home/node/.bashrc
+  
+# Disable Hardhat telemetry by default  
+  echo "export HARDHAT_DISABLE_TELEMETRY_PROMPT=true" >> /home/node/.bashrc
 
 # Add health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
