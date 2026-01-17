@@ -56,6 +56,9 @@ services:
       - WORKSPACE_FOLDER=/workspaces/${WORKSPACE_NAME:-diamonds_project}
       - VAULT_ADDR=http://vault-dev:8200
       - DIAMOND_NAME=${DIAMOND_NAME:-ExampleDiamond}
+      # Security scanning tokens
+      - SNYK_TOKEN=${SNYK_TOKEN}
+      - SOCKET_CLI_API_TOKEN=${SOCKET_CLI_API_TOKEN}
     networks:
       - project-network
     depends_on:

@@ -95,7 +95,13 @@ setup_environment_variables() {
     # Load .env file if it exists
     if [ -f ".env" ]; then
         log_info "Loading environment variables from .env"
-        # Note: .env is already mounted and should be loaded by the shell
+        # Export security scanning tokens
+        if grep -q "^SNYK_TOKEN=" ".env"; then
+            export SNYK_TOKEN=$(grep "^SNYK_TOKEN=" ".env" | cut -d'=' -f2)
+        fi
+        if grep -q "^SOCKET_CLI_API_TOKEN=" ".env"; then
+            export SOCKET_CLI_API_TOKEN=$(grep "^SOCKET_CLI_API_TOKEN=" ".env" | cut -d'=' -f2)
+        fi
     else
         log_warning ".env file not found. Copy from .env.example if needed"
     fi
